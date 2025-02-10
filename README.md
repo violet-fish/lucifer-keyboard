@@ -1,5 +1,4 @@
 # Lucifer
----
 
 _Calothorax lucifer_
 
