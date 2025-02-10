@@ -1,0 +1,220 @@
+meta:
+  engine: 4.0.0
+  name: lucifer
+  version: 0.1
+  author: violet-fish, jcmkk3
+  url: https://github.com/violet-fish/lucifer-keyboard
+
+presets:
+  # These presets provide different layout options
+  # Select a preset in the `units` section below
+  # Note: The appropriate switch footprint will still need to be set in the `pcb` section
+  choc_spaced:
+    capx: 17        # Key cap size horizontal
+    capy: 16        # Key cap size vertical
+    kx: 18.5        # Key spacing horizontal
+    ky: 17.5        # Key spacing vertical
+    pinky_splay: 5  # Degrees of splay between pinky and ring columns
+    pinky_adj: -3   # Adjustment to compensate for splay spacing
+    ring_splay: 3
+    ring_adj: -8
+    middle_splay: 0
+    middle_adj: 0
+    thumb_offsetx: 0.25kx
+  
+  choc_min_spaced:
+    capx: 14.5
+    capy: 14.5
+    kx: 15.5
+    ky: 15.5
+    pinky_splay: 5
+    pinky_adj: -3
+    ring_splay: 3
+    ring_adj: -8
+    middle_splay: 3
+    middle_adj: -5
+    thumb_offsetx: 1/3kx
+
+  mx_spaced:
+    capx: 18
+    capy: 18
+    kx: 19
+    ky: 19
+    pinky_splay: 5
+    pinky_adj: -4
+    ring_splay: 3
+    ring_adj: -10
+    middle_splay: 0
+    middle_adj: 0
+    thumb_offsetx: 0.25kx
+  
+  mx_min_spaced:
+    capx: 15.5
+    capy: 15.5
+    kx: 16 + 0.5
+    ky: 16 + 0.5
+    pinky_splay: 5
+    pinky_adj: -3
+    ring_splay: 3
+    ring_adj: -8
+    middle_splay: 3
+    middle_adj: -5
+    thumb_offsetx: 1/3kx
+
+units:
+  $extends: presets.choc_spaced
+  angle: 30  # Angle between halves
+
+  # Defaults/Constants
+  # ====================
+  $default_height: 0  # Points invisible by default unless height/width explicitly set
+  $default_width: 0
+  xiao_x: 17.8
+  xiao_y: 21
+  sf: 16
+
+points:
+  zones.matrix:
+    anchor.shift: [100, -100]  # Fix placement on KiCAD sheet
+    rotate: -angle + pinky_splay + ring_splay
+    mirror:
+      ref: matrix_index_top
+      shift: [0.5sf, 0.5sf]
+      distance: 13
+    key:
+      width: capx
+      height: capy
+      spread: kx      
+      padding: ky
+      autobind: 0
+    rows:
+      bottom:
+      top:
+    columns.pinky:
+      rows:
+        bottom:
+          bind: [0.5ky, 0, 0, 0]
+        top:
+          bind: [0, 0.5kx, 0, 0]
+    columns.ring:
+      key:
+        stagger: 2/3ky
+        splay: -pinky_splay
+        origin: [0, pinky_adj]
+      rows:
+        bottom:
+          bind: [0, 0, 0, 0.5ky]
+        top:
+          bind: [0, 0.5kx, 0.5ky, 0]
+    columns.middle:
+      key:
+        stagger: 0.25ky
+        splay: -ring_splay
+        origin: [0, ring_adj]
+      rows:
+        bottom:
+          bind: [0.5ky, 0.5kx, 0, 0.5kx]
+        top:
+          bind: [0, 0, 0.5ky, 0]
+    columns.index:
+      key.stagger: -0.25ky
+      rows:
+        bottom:
+          bind: [0.5ky, 0, 0, 0]
+        top:
+          bind: [0, 0, 0.5ky, 0.5kx]
+  zones.thumb:
+    anchor:
+      ref: matrix_index_bottom
+      shift: [0.25kx, -22]
+    mirror.$extends: points.zones.matrix.mirror
+    key.$extends: points.zones.matrix.key
+    columns:
+      tucky:
+        key:
+          bind: [0.5ky, 0.5kx, 0, 0]
+      reachy:
+        key:
+          stagger: -0.25ky        
+          bind: [1.5ky, 0, 0, 0]
+  zones.reference_top_center:
+    anchor:
+      aggregate.parts: [matrix_index_top, mirror_matrix_index_top]
+      shift: [0, -0.65ky]
+  zones.mcu:
+    anchor:
+      ref: reference_top_center
+      shift: [0, -0.5xiao_y]
+    key:
+      width: xiao_x
+      height: xiao_y
+  zones.mounting_hole:
+    anchor:
+      ref: matrix_index_bottom
+      shift: [0.5kx + 4, -0.75ky + 4]
+    mirror.$extends: points.zones.matrix.mirror
+    key:
+      width: 1
+      height: 1
+outlines:
+    _key_outline:
+      - what: rectangle
+        bound: true
+        size: sf
+        where:
+          - /matrix_.*/
+          - /thumb_.*/
+    _center:
+      - what: rectangle
+        where:
+          ref: reference_top_center
+          shift: [0, -1.5ky]
+        size: [3kx, 3ky]
+    _panel:
+      - name: _center
+        fillet: 3  # The inner rounding where the glue meets the top center keys
+      - operation: subtract
+        what: circle
+        where:
+          aggregate.parts: [thumb_reachy, mirror_thumb_reachy]
+          shift: [0, 0.5sf - 60]
+        radius: 60  # Should be the same as the last number in `shift` above
+      - _key_outline
+    panel:
+      - name: _panel
+        fillet: 1.5
+    _switches:
+      - what: rectangle
+        size: 14
+        where:
+          - /matrix_.*/
+          - /thumb_.*/
+    _keycaps:
+      - what: rectangle
+        size: [capx, capy]
+        where:
+          - /matrix_.*/
+          - /thumb_.*/
+    _mcu:
+      - what: rectangle
+        where: mcu
+        size: [xiao_x, xiao_y]
+    _mounting_holes:
+      - what: circle
+        where: /.*mounting_hole/
+        radius: 1
+    demo_switches:
+      - panel
+      - ^_switches
+      - ^_mcu
+      - ^_mounting_holes
+    demo_keycaps:
+      - panel
+      - ^_keycaps
+      - ^_mcu
+      - ^_mounting_holes
+    switchplate:
+      - panel
+      - operation: subtract
+        name: _switches
+        fillet: 0.5
