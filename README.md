@@ -3,3 +3,5 @@
 _Calothorax lucifer_
 
 20 key variant of [jcmkk3](https://github.com/jcmkk3)'s [rufous](https://github.com/jcmkk3/trochilidae/tree/main)
+
+![wip lucifer keyboard image](Lucifer-keyboard-wip-layout.jpg)
