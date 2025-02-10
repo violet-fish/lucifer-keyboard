@@ -169,7 +169,11 @@ outlines:
         where:
           ref: reference_top_center
           shift: [0, -1.5ky]
-        size: [3kx, 3ky]
+        size: [2.7kx, 3ky]
+      - what: rectangle
+        bound: true
+        size: sf
+        where: /matrix_index_.*/  # Include the index keys in addition to the center polygon to fillet correctly
     _panel:
       - name: _center
         fillet: 3  # The inner rounding where the glue meets the top center keys
@@ -177,8 +181,8 @@ outlines:
         what: circle
         where:
           aggregate.parts: [thumb_reachy, mirror_thumb_reachy]
-          shift: [0, 0.5sf - 60]
-        radius: 60  # Should be the same as the last number in `shift` above
+          shift: [0, 0.2sf - 40]
+        radius: 40  # Should be the same as the last number in `shift` above
       - _key_outline
     panel:
       - name: _panel
